@@ -3,6 +3,12 @@
 # ============================================================================================================
 # Launch mysed tests
 # - Usage: ./mysed_tester.sh binary_filename "match_pattern" "replace_pattern"
+# - Example: ./mysed_tester.sh mysed "match" "replace"
+# - NOTES:
+#   - Script create a test directory in parent directory
+#	- Tests files have two extensions:
+#		- .kotest: files that should cause mysed to fail
+#		- .oktest: files that should be successfully processed by mysed
 # ============================================================================================================
  
 # =[ VARIABLES ]==============================================================================================
@@ -102,78 +108,82 @@ else
 	echo -e "${R0} * ${GU}Test directory already exists.${E}"
 fi
 # -[ Create fails files ]--------------------------------------------------------------------------------------
-FAIL_FILE_LIST=( "no_an_existing_file.test" )
+FAIL_FILE_LIST=( "no_an_existing_file.kotest" )
+# Fill list with existing .kotest files
+for ff in "${TEST_DIR}"/*.kotest; do
+	[[ -e "${ff}" ]] && FAIL_FILE_LIST+=( "$(basename "${ff}")" )
+done
 # No readable file
-create_file_add_to_list "not_readable_file.test" "FAIL_FILE_LIST"
-echo "This should not be readable." >> "${TEST_DIR}/not_readable_file.test"
-chmod -r "${TEST_DIR}/not_readable_file.test"
-# No writable file
-create_file_add_to_list "not_writable_file.test" "FAIL_FILE_LIST"
-echo "This should be the last writable thing in this file." >> "${TEST_DIR}/not_writable_file.test"
-chmod -w "${TEST_DIR}/not_writable_file.test"
+create_file_add_to_list "not_readable_file.kotest" "FAIL_FILE_LIST"
+echo "This should not be readable." >> "${TEST_DIR}/not_readable_file.kotest"
+chmod -r "${TEST_DIR}/not_readable_file.kotest"
+## No writable file --> NOTE: are you dumb or something...this works...daaa...
+#create_file_add_to_list "not_writable_file.kotest" "FAIL_FILE_LIST"
+#echo "This should be the last writable thing in this file." >> "${TEST_DIR}/not_writable_file.kotest"
+#chmod -w "${TEST_DIR}/not_writable_file.kotest"
 # -[ Create success files ]-------------------------------------------------------------------------------------
 SUCC_FILE_LIST=( )
+# Fill list with existing .oktest files
+for ff in "${TEST_DIR}"/*.oktest; do
+	[[ -e "${ff}" ]] && SUCC_FILE_LIST+=( "$(basename "${ff}")" )
+done
 # Empty file
-create_file_add_to_list "empty_file.test" "SUCC_FILE_LIST"
+create_file_add_to_list "empty_file.oktest" "SUCC_FILE_LIST"
 # ------ ONELINE FILES ------
 # oneline no match no end-backslashes
-create_file_add_to_list "oneLine_noMatch_noEndBackSlash.test" "SUCC_FILE_LIST"
-echo -n "This one line file does not contains any MaTcH and end without backslash." > "${TEST_DIR}/oneLine_noMatch_noEndBackSlash.test"
+create_file_add_to_list "oneLine_noMatch_noEndBackSlash.oktest" "SUCC_FILE_LIST"
+echo -n "This one line file does not contains any MaTcH and end without backslash." > "${TEST_DIR}/oneLine_noMatch_noEndBackSlash.oktest"
 # oneline no match with end-backslashes
-create_file_add_to_list "oneLine_noMatch_endBackSlash.test" "SUCC_FILE_LIST"
-echo "This one line file does not contains any MaTcH and end with backslash." > "${TEST_DIR}/oneLine_noMatch_endBackSlash.test"
+create_file_add_to_list "oneLine_noMatch_endBackSlash.oktest" "SUCC_FILE_LIST"
+echo "This one line file does not contains any MaTcH and end with backslash." > "${TEST_DIR}/oneLine_noMatch_endBackSlash.oktest"
 # oneline one match no end-backslashes
-create_file_add_to_list "oneLine_oneMatch_noEndBackSlash.test" "SUCC_FILE_LIST"
-echo -n "This one line file does not contains one match and end without backslash." > "${TEST_DIR}/oneLine_oneMatch_noEndBackSlash.test"
+create_file_add_to_list "oneLine_oneMatch_noEndBackSlash.oktest" "SUCC_FILE_LIST"
+echo -n "This one line file does not contains one match and end without backslash." > "${TEST_DIR}/oneLine_oneMatch_noEndBackSlash.oktest"
 # oneline one match with end-backslashes
-create_file_add_to_list "oneLine_oneMatch_endBackSlash.test"	"SUCC_FILE_LIST"
-echo "This one line file does not contains one match and end without backslash." > "${TEST_DIR}/oneLine_oneMatch_endBackSlash.test"
+create_file_add_to_list "oneLine_oneMatch_endBackSlash.oktest"	"SUCC_FILE_LIST"
+echo "This one line file does not contains one match and end without backslash." > "${TEST_DIR}/oneLine_oneMatch_endBackSlash.oktest"
 # only one match no end-backslashes
-create_file_add_to_list "oneLine_onlyoneMatch_noEndBackSlash.test" "SUCC_FILE_LIST"
-echo -n "match" > "${TEST_DIR}/oneLine_onlyoneMatch_noEndBackSlash.test"
+create_file_add_to_list "oneLine_onlyoneMatch_noEndBackSlash.oktest" "SUCC_FILE_LIST"
+echo -n "match" > "${TEST_DIR}/oneLine_onlyoneMatch_noEndBackSlash.oktest"
 # only one match with end-backslashes
-create_file_add_to_list "oneLine_onlyoneMatch_endBackSlash.test" "SUCC_FILE_LIST"
-echo "match" > "${TEST_DIR}/oneLine_onlyoneMatch_endBackSlash.test"
+create_file_add_to_list "oneLine_onlyoneMatch_endBackSlash.oktest" "SUCC_FILE_LIST"
+echo "match" > "${TEST_DIR}/oneLine_onlyoneMatch_endBackSlash.oktest"
 # only multiple match no end-backslashes
-create_file_add_to_list "oneLine_onlymultiMatch_noEndBackSlash.test" "SUCC_FILE_LIST"
-echo -n "matchmatchmatchmatch" > "${TEST_DIR}/oneLine_onlymultiMatch_noEndBackSlash.test"
+create_file_add_to_list "oneLine_onlymultiMatch_noEndBackSlash.oktest" "SUCC_FILE_LIST"
+echo -n "matchmatchmatchmatch" > "${TEST_DIR}/oneLine_onlymultiMatch_noEndBackSlash.oktest"
 # only multiple match with end-backslashes
-create_file_add_to_list "oneLine_onlymultiMatch_endBackSlash.test" "SUCC_FILE_LIST"
-echo "matchmatchmatchmatch" > "${TEST_DIR}/oneLine_onlymultiMatch_endBackSlash.test"
+create_file_add_to_list "oneLine_onlymultiMatch_endBackSlash.oktest" "SUCC_FILE_LIST"
+echo "matchmatchmatchmatch" > "${TEST_DIR}/oneLine_onlymultiMatch_endBackSlash.oktest"
 # oneline multiple match no end-backslashes
-create_file_add_to_list "oneLine_multiMatch_noEndBackSlash.test" "SUCC_FILE_LIST"
-echo -n "First match, double matchmatch, last:match!" > "${TEST_DIR}/oneLine_multiMatch_noEndBackSlash.test"
+create_file_add_to_list "oneLine_multiMatch_noEndBackSlash.oktest" "SUCC_FILE_LIST"
+echo -n "First match, double matchmatch, last:match!" > "${TEST_DIR}/oneLine_multiMatch_noEndBackSlash.oktest"
 # oneline multiple match with end-backslashes
-create_file_add_to_list "oneLine_multiMatch_endBackSlash.test" "SUCC_FILE_LIST"
-echo "First match, double matchmatch, last:match!" > "${TEST_DIR}/oneLine_multiMatch_endBackSlash.test"
+create_file_add_to_list "oneLine_multiMatch_endBackSlash.oktest" "SUCC_FILE_LIST"
+echo "First match, double matchmatch, last:match!" > "${TEST_DIR}/oneLine_multiMatch_endBackSlash.oktest"
 
 # ------ MULTIPLE LINES ------
 # Multiple empty lines file
-create_file_add_to_list "multiLines_empty.test" "SUCC_FILE_LIST"
-echo -e "\n\n\n\n\n" > "${TEST_DIR}/multiLines_empty.test"
+create_file_add_to_list "multiLines_empty.oktest" "SUCC_FILE_LIST"
+echo -e "\n\n\n\n\n" > "${TEST_DIR}/multiLines_empty.oktest"
 # Multiple lines file with no match and no end-backslashes
-create_file_add_to_list "multiLines_noMatch_noEndBackslash.test" "SUCC_FILE_LIST"
-echo -en "\nThis is a line\n\nThis is another line\n\nThis is the last line" > "${TEST_DIR}/multiLines_noMatch_noEndBackslash.test"
+create_file_add_to_list "multiLines_noMatch_noEndBackslash.oktest" "SUCC_FILE_LIST"
+echo -en "\nThis is a line\n\nThis is another line\n\nThis is the last line" > "${TEST_DIR}/multiLines_noMatch_noEndBackslash.oktest"
 # Multiple lines file with no match and with end-backslashes
-create_file_add_to_list "multiLines_noMatch_noEndBackslash.test" "SUCC_FILE_LIST"
-echo -e "\nThis is a line\n\nThis is another line\n\nThis is the last line" > "${TEST_DIR}/multiLines_noMatch_noEndBackslash.test"
+create_file_add_to_list "multiLines_noMatch_noEndBackslash.oktest" "SUCC_FILE_LIST"
+echo -e "\nThis is a line\n\nThis is another line\n\nThis is the last line" > "${TEST_DIR}/multiLines_noMatch_noEndBackslash.oktest"
 # Multiple lines only matches and no end-backslashes
-create_file_add_to_list "multiLines_onlyMatches_noEndBackslash.test" "SUCC_FILE_LIST"
-echo -en "match\nmatchmatch\nmatchmatchmatch\nmatchmatch\nmatch" > "${TEST_DIR}/multiLines_onlyMatches_noEndBackslash.test"
+create_file_add_to_list "multiLines_onlyMatches_noEndBackslash.oktest" "SUCC_FILE_LIST"
+echo -en "match\nmatchmatch\nmatchmatchmatch\nmatchmatch\nmatch" > "${TEST_DIR}/multiLines_onlyMatches_noEndBackslash.oktest"
 # Multiple lines only matches and with end-backslashes
-create_file_add_to_list "multiLines_onlyMatches_withEndBackslash.test" "SUCC_FILE_LIST"
-echo -e "match\nmatchmatch\nmatchmatchmatch\nmatchmatch\nmatch" > "${TEST_DIR}/multiLines_onlyMatches_withEndBackslash.test"
+create_file_add_to_list "multiLines_onlyMatches_withEndBackslash.oktest" "SUCC_FILE_LIST"
+echo -e "match\nmatchmatch\nmatchmatchmatch\nmatchmatch\nmatch" > "${TEST_DIR}/multiLines_onlyMatches_withEndBackslash.oktest"
 # Multiple lines file with muliple matches and no end-backslashes
-create_file_add_to_list "multiLines_noMatch_noEndBackslash.test" "SUCC_FILE_LIST"
-echo -en "match\nThis is a line without any MatChes\nmatchmatchmatch\nmatchThis is anmatchother linematch\n\nmatch" > "${TEST_DIR}/multiLines_noMatch_noEndBackslash.test"
+create_file_add_to_list "multiLines_noMatch_noEndBackslash.oktest" "SUCC_FILE_LIST"
+echo -en "match\nThis is a line without any MatChes\nmatchmatchmatch\nmatchThis is anmatchother linematch\n\nmatch" > "${TEST_DIR}/multiLines_noMatch_noEndBackslash.oktest"
 # Multiple lines file with muliple matches and with end-backslashes
-create_file_add_to_list "multiLines_noMatch_withEndBackslash.test" "SUCC_FILE_LIST"
-echo -e "match\nThis is a line without any MatChes\nMatchmAtchmaTch\nmatChThis is anmatChother linematcH\n\nMatcH" > "${TEST_DIR}/multiLines_noMatch_withEndBackslash.test"
+create_file_add_to_list "multiLines_noMatch_withEndBackslash.oktest" "SUCC_FILE_LIST"
+echo -e "match\nThis is a line without any MatChes\nMatchmAtchmaTch\nmatChThis is anmatChother linematcH\n\nMatcH" > "${TEST_DIR}/multiLines_noMatch_withEndBackslash.oktest"
 
-#echo THIS IS MY FAIL FILES:
-#for file in "${FAIL_FILE_LIST[@]}"; do
-#	echo -e " - ${R0}${file}${E}"
-#done
 #echo THIS IS MY SUCCESS FILES:
 #for file in "${SUCC_FILE_LIST[@]}"; do
 #	echo -e " - ${V0}${file}${E}"
@@ -182,4 +192,64 @@ echo -e "match\nThis is a line without any MatChes\nMatchmAtchmaTch\nmatChThis i
 #	echo -e "${G0}--------------------------------------------------${E}"
 #done
 # =[ Run tests ]==============================================================================================
-title "STEP 3: Run tests"
+title "STEP 3: Run mysed on fails files"
+#echo THIS IS MY FAIL FILES:
+#for file in "${FAIL_FILE_LIST[@]}"; do
+#	echo -e " - ${R0}${file}${E}"
+#done
+for file in "${FAIL_FILE_LIST[@]}"; do
+	echo -e "${R0} * ${GU}Testing on file:${E} ${G0} ./mysed '${file}' 'match' 'replacedBy'"
+	"${BIN_PATH}" "${TEST_DIR}/${file}" "match" "replace"
+done
+
+title "STEP 4: Run mysed on success files but with empty patterns"
+echo -e "${R0} * ${GU}Testing empty match on success file (make a copy):${E} ${G0} ./mysed 'Makefile' '' 'ERROR_THIS_IS_YODA_LA_HI_HOU'${E}"
+"${BIN_PATH}" "${GP_DIR}/Makefile" "" "ERROR_THIS_IS_YODA_LA_HI_HOU"
+read -r -p "Do you want to see the diff. between Makefile and Makefile.replace [y/n] " answer
+case "${answer}" in
+	[yY][eE][sS]|[yY])
+		vimdiff "${GP_DIR}/Makefile" "${GP_DIR}/Makefile.replace"
+		;;
+	*)
+		;;
+esac
+echo -e "${R0} * ${GU}Testing empty replace on success file (delete matches):${E} ${G0} ./mysed 'Makefile' 'echo' ''${E}"
+"${BIN_PATH}" "${GP_DIR}/Makefile" "echo" ""
+read -r -p "Do you want to see the diff. between ${file} and ${file}.replace [y/n]" answer
+case "${answer}" in
+	[yY][eE][sS]|[yY])
+		vimdiff "${GP_DIR}/Makefile" "${GP_DIR}/Makefile.replace"
+		;;
+	*)
+		;;
+esac
+
+title "STEP 5: Run mysed on success files --> REPLACE"
+for file in "${SUCC_FILE_LIST[@]}"; do
+	echo -e "${R0} * ${GU}Testing on file:${E} ${G0} ./mysed '${file}' 'match' 'replacedBy'"
+	"${BIN_PATH}" "${TEST_DIR}/${file}" "match" "replace"
+	read -r -p "Do you want to see the diff. between ${file} and ${file}.replace [y/n]" answer
+	case "${answer}" in
+		[yY][eE][sS]|[yY])
+			vimdiff "${TEST_DIR}/${file}" "${TEST_DIR}/${file}.replace"
+			;;
+		*)
+			continue
+			;;
+	esac
+done
+
+title "STEP 6: Run mysed on success files --> DELETE"
+for file in "${SUCC_FILE_LIST[@]}"; do
+	echo -e "${R0} * ${GU}Testing on file:${E} ${G0} ./mysed '${file}' 'match' ''"
+	"${BIN_PATH}" "${TEST_DIR}/${file}" "match" ""
+	read -r -p "Do you want to see the diff. between ${file} and ${file}.replace [y/n]" answer
+	case "${answer}" in
+		[yY][eE][sS]|[yY])
+			vimdiff "${TEST_DIR}/${file}" "${TEST_DIR}/${file}.replace"
+			;;
+		*)
+			continue
+			;;
+	esac
+done
